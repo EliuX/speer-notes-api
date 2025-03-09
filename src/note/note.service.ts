@@ -19,16 +19,18 @@ export class NoteService {
     return this.noteRepository.save(noteDto.forUser(ownerId));
   }
 
-  findAll(ownerId?: string) {
+  async findAll(ownerId?: string) {
     return this.noteRepository.find({
-      ownerId: ownerId ? convertStringToObjectId(ownerId) : undefined,
+      where: {
+        ownerId: convertStringToObjectId(ownerId),
+      },
     });
   }
 
   async findOne(uid: string, ownerId: string): Promise<Note> {
     const user = await this.noteRepository.findOneBy({
       id: convertStringToObjectId(uid),
-      ownerId: ownerId ? convertStringToObjectId(ownerId) : undefined,
+      ownerId: ownerId,
     });
 
     if (!user) {

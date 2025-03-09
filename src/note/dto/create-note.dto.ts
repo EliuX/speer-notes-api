@@ -1,5 +1,8 @@
 import { OmitType } from '@nestjs/swagger';
-import { CommonReadOnlyAttributes } from 'src/shared/entityUtils';
+import {
+  CommonReadOnlyAttributes,
+  convertStringToObjectId,
+} from 'src/shared/entityUtils';
 import { Note } from '../entities/note.entity';
 import { plainToClassFromExist } from 'class-transformer';
 
@@ -14,6 +17,9 @@ export class CreateNoteDto extends OmitType(Note, [
 
   forUser(ownerId: string) {
     const note = new Note();
-    return plainToClassFromExist(note, { ownerId });
+    return plainToClassFromExist(note, {
+      ...this,
+      ownerId: convertStringToObjectId(ownerId),
+    });
   }
 }

@@ -31,14 +31,14 @@ export class NoteController {
   })
   @ApiBody({ type: CreateNoteDto })
   @ApiResponse({ status: 400, description: 'Bad Request' })
-  create(@Req() req, @Body() createNoteDto: CreateNoteDto) {
+  async create(@Req() req, @Body() createNoteDto: CreateNoteDto) {
     return this.noteService.create(createNoteDto, req.user.sub);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all notes' })
   @ApiResponse({ status: 200, description: 'Return all notes.' })
-  findAll(@Req() req) {
+  async findAll(@Req() req) {
     return this.noteService.findAll(req.user.sub);
   }
 

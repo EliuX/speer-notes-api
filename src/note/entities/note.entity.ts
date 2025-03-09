@@ -1,8 +1,10 @@
 import { BaseEntity } from 'src/shared/base.entity';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, Index, ObjectId, ObjectIdColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { faker } from '@faker-js/faker';
 import { IsNotEmpty, IsString, Length } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { convertObjectIdToString } from 'src/shared/entityUtils';
 
 @Entity('notes')
 export class Note extends BaseEntity {
@@ -14,6 +16,7 @@ export class Note extends BaseEntity {
   @IsString()
   @Length(1, 255)
   @Column({ nullable: false })
+  @Index({ fulltext: true })
   title!: string;
 
   @ApiProperty({
@@ -23,13 +26,20 @@ export class Note extends BaseEntity {
   @IsNotEmpty()
   @IsString()
   @Column({ nullable: false })
+  @Index({ fulltext: true })
   content!: string;
 
   @ApiProperty({
     description: 'ID of the owner of the note',
     example: '67cde5e03e647eb8cd00ba36',
   })
-  @IsNotEmpty()
   @Column()
+  @ObjectIdColumn()
+  @Transform(
+    ({ value }: { value: ObjectId }) => convertObjectIdToString(value),
+    {
+      toPlainOnly: true,
+    },
+  )
   ownerId: string;
 }

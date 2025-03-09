@@ -5,16 +5,18 @@ import { AppModule } from 'src/app.module';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { faker } from '@faker-js/faker';
 import { CreateNoteDto } from 'src/note/dto/create-note.dto';
+import { Note } from 'src/note/entities/note.entity';
+import { AuthUserDto } from 'src/auth/dto/auth-user.dto';
 
 describe('Notes API (e2e)', () => {
   let app: INestApplication;
-  let validCredentials: any;
+  let validCredentials: CreateUserDto;
+  let validUser: AuthUserDto;
   let authToken: string;
-  let noteId: string;
 
   const createUser = async () => {
     if (!validCredentials) {
-      const payload = {
+      validCredentials = {
         name: faker.person.fullName(),
         email: faker.internet.email(),
         password: 'TestPassword123',
@@ -22,24 +24,26 @@ describe('Notes API (e2e)', () => {
 
       await request(app.getHttpServer())
         .post('/auth/signup')
-        .send(payload)
+        .send(validCredentials)
         .expect(201)
         .then((response) => {
           expect(response.body).toHaveProperty('id');
-          expect(response.body).toHaveProperty('email', payload.email);
+          expect(response.body).toHaveProperty('email', validCredentials.email);
+          validUser = new AuthUserDto(response.body);
         });
-
-      validCredentials = payload;
     }
 
     return validCredentials;
   };
 
   const loginUser = async () => {
-    const user = await createUser();
+    const userCredentials = await createUser();
     const response = await request(app.getHttpServer())
       .post('/auth/login')
-      .send({ email: user.email, password: user.password })
+      .send({
+        email: userCredentials.email,
+        password: userCredentials.password,
+      })
       .expect(200);
 
     expect(response.body).toHaveProperty('access_token');
@@ -62,7 +66,7 @@ describe('Notes API (e2e)', () => {
     await app?.close();
   });
 
-  describe.only('Auth', () => {
+  describe('Auth', () => {
     it('should sign up a new user', async () => {
       await createUser();
     });
@@ -85,63 +89,80 @@ describe('Notes API (e2e)', () => {
   });
 
   describe('Notes', () => {
+    let newNote: Note;
+
     beforeAll(async () => {
       await loginUser();
     });
 
-    it.only('should create a new note', async () => {
-      const notePayload = {
-        title: 'Test Note',
-        content: 'This is a test note.',
-      } as CreateNoteDto;
+    const createNewNote = async () => {
+      if (!newNote) {
+        const newNotePayload = {
+          title: 'Test Note',
+          content: 'This is a test note.',
+        } as CreateNoteDto;
 
-      const response = await request(app.getHttpServer())
-        .post('/notes')
-        .set('Authorization', `Bearer ${authToken}`)
-        .send(notePayload)
-        .expect(201);
+        const response = await request(app.getHttpServer())
+          .post('/notes')
+          .set('Authorization', `Bearer ${authToken}`)
+          .send(newNotePayload)
+          .expect(201);
 
-      expect(response.body).toHaveProperty('id');
-      noteId = response.body.id;
+        expect(response.body).toHaveProperty('id');
+        expect(response.body).toHaveProperty('ownerId', validUser.id);
+        newNote = response.body;
+      }
+
+      return newNote;
+    };
+
+    it('should create a new note', async () => {
+      await createNewNote();
     });
 
     it('should get all notes for the authenticated user', async () => {
+      await createNewNote();
+
       const response = await request(app.getHttpServer())
         .get('/notes')
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length > 0).toBe(true);
     });
 
     it('should get a note by ID', async () => {
       const response = await request(app.getHttpServer())
-        .get(`/notes/${noteId}`)
+        .get(`/notes/${newNote.id}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
-      expect(response.body).toHaveProperty('title', 'Test Note');
+
+      expect(response.body).toHaveProperty('title', newNote.title);
+      expect(response.body).toHaveProperty('content', newNote.content);
     });
 
     it('should update a note by ID', async () => {
       const response = await request(app.getHttpServer())
-        .put(`/notes/${noteId}`)
+        .put(`/notes/${newNote.id}`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({ title: 'Updated Note', content: 'Updated content.' })
         .expect(200);
 
       expect(response.body).toHaveProperty('title', 'Updated Note');
+      expect(response.body).toHaveProperty('content', 'Updated content.');
     });
 
     it('should delete a note by ID', async () => {
       await request(app.getHttpServer())
-        .delete(`/notes/${noteId}`)
+        .delete(`/notes/${newNote.id}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
     });
 
     it('should share a note with another user', async () => {
       const response = await request(app.getHttpServer())
-        .post(`/notes/${noteId}/share`)
+        .post(`/notes/${newNote.id}/share`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({ sharedWith: 'anotheruser' })
         .expect(201);
