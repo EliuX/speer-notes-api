@@ -1,10 +1,8 @@
-import { Column, Entity, ObjectId, ObjectIdColumn } from 'typeorm';
+import { BaseEntity } from 'src/shared/base.entity';
+import { Column, Entity } from 'typeorm';
 
 @Entity('notes')
-export class Note {
-  @ObjectIdColumn()
-  id!: ObjectId;
-
+export class Note extends BaseEntity {
   @Column()
   title: string;
 
@@ -13,10 +11,4 @@ export class Note {
 
   @Column()
   ownerId: string;
-
-  @Column({ insert: true })
-  createdAt = new Date();
-
-  @Column({ update: true })
-  updatedAt = new Date();
 }

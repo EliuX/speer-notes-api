@@ -1,7 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
-import { AppModule } from './../src/app.module';
+import { AppModule } from 'src/app.module';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { faker } from '@faker-js/faker';
+import { after } from 'node:test';
+import { JsonContains } from 'typeorm';
 
 describe('Notes API (e2e)', () => {
   let app: INestApplication;
@@ -14,18 +18,42 @@ describe('Notes API (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe());
+
     await app.init();
   });
 
   afterAll(async () => {
-    await app.close();
+    await app?.close();
   });
 
   it('should sign up a new user', async () => {
+    const payload = {
+      name: faker.person.fullName(),
+      email: faker.internet.email(),
+      password: 'TestPassword123',
+    } as CreateUserDto;
+
     await request(app.getHttpServer())
-      .post('/api/auth/signup')
-      .send({ username: 'testuser', password: 'TestPassword123' })
-      .expect(201);
+      .post('/auth/signup')
+      .send(payload)
+      .expect(201)
+      .then((response) => {
+        expect(response.body).toHaveProperty('id');
+        expect(response.body).toHaveProperty('email', payload.email);
+      });
+  });
+
+  it('should return a 400 if sign up is missing the email', async () => {
+    const badPayload = { 
+      name: faker.person.fullName(),
+      password: 'TestPassword123',
+     } as CreateUserDto;
+
+    await request(app.getHttpServer())
+      .post('/auth/signup')
+      .send(badPayload)
+      .expect(400);
   });
 
   it('should log in an existing user and receive an access token', async () => {
