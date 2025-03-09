@@ -10,10 +10,6 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  console.log(
-    `Running in ${configService.isProduction() ? 'prod' : 'dev'} mode`,
-  );
-
   app.useGlobalPipes(
     new ValidationPipe({
       disableErrorMessages: configService.isProduction(),
@@ -22,7 +18,12 @@ async function bootstrap() {
   setupGlobalFilters(app);
   setupSwagger(app);
 
-  await app.listen(process.env.PORT ?? 3000);
+  const port = process.env.PORT ?? 3000;
+  await app.listen(port);
+
+  console.log(
+    `Running in ${configService.isProduction() ? 'prod' : 'dev'} mode on port ${port}`,
+  );
 }
 
 export function setupSwagger(app: INestApplication): void {

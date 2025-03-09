@@ -1,4 +1,7 @@
+import { faker } from '@faker-js/faker';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import * as bcrypt from 'bcrypt';
+import { Exclude, instanceToPlain } from 'class-transformer';
 import {
   IsEmail,
   IsNotEmpty,
@@ -8,7 +11,8 @@ import {
   MinLength,
 } from 'class-validator';
 import { BaseEntity } from 'src/shared/base.entity';
-import { Column, Entity } from 'typeorm';
+import { BCRYPT_SALT_ROUNDS } from 'src/shared/entityUtils';
+import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -17,7 +21,7 @@ export class User extends BaseEntity {
     description: 'User"s name',
     minLength: 3,
     maxLength: 50,
-    example: 'John Doe',
+    example: faker.person.fullName(),
   })
   @IsString()
   @IsNotEmpty()
@@ -29,13 +33,13 @@ export class User extends BaseEntity {
   @ApiProperty({
     description: 'User"s email address (must be unique)',
     format: 'email',
-    example: 'john.doe@example.com',
+    example: faker.internet.email(),
   })
   @IsEmail()
   @IsNotEmpty()
   email!: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, select: false })
   @ApiProperty({
     description: 'User"s password (minimum 8 characters)',
     minLength: 8,
@@ -43,14 +47,34 @@ export class User extends BaseEntity {
   })
   @IsString()
   @MinLength(8)
+  @Exclude({ toPlainOnly: true })
   password!: string;
 
   @Column({ nullable: true })
   @ApiPropertyOptional({
     description: 'User"s phone number (optional)',
-    example: '+15551234567',
+    example: faker.phone.number(),
   })
   @IsOptional()
   @IsString()
   phoneNumber?: string;
+
+  async validatePassword(attempt: string): Promise<boolean> {
+    return bcrypt.compare(attempt, this.password);
+  }
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async hashPassword() {
+    if (this.password) {
+      this.password = await bcrypt.hash(
+        this.password,
+        Number(BCRYPT_SALT_ROUNDS),
+      );
+    }
+  }
+
+  toJSON() {
+    return instanceToPlain(this);
+  }
 }

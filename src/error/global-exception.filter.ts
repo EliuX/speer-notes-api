@@ -25,8 +25,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         ? exception.message
         : 'Unexpected error. Our team is working to solve this issue.';
 
-    if (statusCode === HttpStatus.INTERNAL_SERVER_ERROR)
-      this.logger.error(exception);
+     
+    this.logger.error(exception);
 
     respondWithStandardFormat(host, statusCode, message);
   }

@@ -15,15 +15,21 @@ export class UserService {
   async create(dto: CreateUserDto): Promise<User> {
     const user = this.userRepository.create(dto);
 
-    return this.userRepository.save(user);
+    return await this.userRepository.save(user);
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    return (
-      (await this.userRepository.findOneBy({
-        email,
-      })) || null
-    );
+  async findByEmailAndPassword(
+    email: string,
+    password: string,
+  ): Promise<User | null> {
+    return this.userRepository
+      .findOne({
+        where: { email },
+        select: ['id', 'name', 'phoneNumber', 'email', 'password'],
+      })
+      .then(async (user) => {
+        return (await user?.validatePassword(password)) ? user : null;
+      });
   }
 
   async delete(uid: string): Promise<void> {

@@ -6,7 +6,6 @@ import {
   Param,
   Delete,
   Put,
-  UseGuards,
   Req,
   HttpCode,
   HttpStatus,
@@ -15,7 +14,6 @@ import { NoteService } from 'src/note/note.service';
 import { CreateNoteDto } from 'src/note/dto/create-note.dto';
 import { UpdateNoteDto } from 'src/note/dto/update-note.dto';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { JwtGuard } from 'src/auth/guard/jwt.guard';
 
 // @UseGuards(JwtGuard)
 @Controller('notes')

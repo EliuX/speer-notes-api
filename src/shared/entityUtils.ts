@@ -2,6 +2,8 @@ import { ObjectId } from 'mongodb';
 import { BadRequestException } from '@nestjs/common';
 import { BaseEntity } from './base.entity';
 
+export const BCRYPT_SALT_ROUNDS = 10;
+
 export const convertObjectIdToString = (id: ObjectId) => {
   return id.toString();
 };
