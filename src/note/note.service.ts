@@ -15,7 +15,6 @@ export class NoteService {
 
   async create(newNote: CreateNoteDto, ownerId: string): Promise<Note> {
     const noteDto = new CreateNoteDto(newNote);
-    console.log('note', noteDto);
     return this.noteRepository.save(noteDto.forUser(ownerId));
   }
 
@@ -28,9 +27,11 @@ export class NoteService {
   }
 
   async findOne(uid: string, ownerId: string): Promise<Note> {
-    const user = await this.noteRepository.findOneBy({
-      id: convertStringToObjectId(uid),
-      ownerId: ownerId,
+    const user = await this.noteRepository.findOne({
+      where: {
+        _id: convertStringToObjectId(uid),
+        ownerId: convertStringToObjectId(ownerId),
+      },
     });
 
     if (!user) {
