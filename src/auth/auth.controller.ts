@@ -1,25 +1,30 @@
-import { Body, Controller, Post } from '@nestjs/common';
 import {
-  ApiBadRequestResponse,
-  ApiBody,
-  ApiCreatedResponse,
-} from '@nestjs/swagger';
-import { User } from 'src/user/entities/user.entity';
-import { UserService } from 'src/user/user.service';
-
-import { CreateUserDto } from 'src/user/dto/create-user.dto';
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { SignInDto } from 'src/auth/dto/sign-in.dto';
+import { JwtGuard } from 'src/auth/guard/jwt.guard';
+import { AuthService } from 'src/auth/auth.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private authService: AuthService) {}
 
-  @Post('signup')
-  @ApiBody({ type: CreateUserDto })
-  @ApiCreatedResponse({
-    description: 'Te user has been successfully created.',
-  })
-  @ApiBadRequestResponse({ description: 'There was an error in the request.' })
-  async signUp(@Body() dto: CreateUserDto): Promise<User> {
-    return this.userService.create(dto);
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  signIn(@Body() signInDto: SignInDto) {
+    return this.authService.signIn(signInDto.email, signInDto.password);
+  }
+
+  @UseGuards(JwtGuard)
+  @Get('profile')
+  getActiveProfile(@Req() req) {
+    return req.user || {};
   }
 }

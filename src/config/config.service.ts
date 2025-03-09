@@ -23,4 +23,8 @@ export class ConfigService {
     const mode = this.configService.get('MODE');
     return mode == 'prod' || mode == 'production';
   }
+
+  public getJWTSecret(): string {
+    return this.configService.getOrThrow('JWT_SECRET');
+  }
 }

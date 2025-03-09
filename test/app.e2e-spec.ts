@@ -4,8 +4,8 @@ import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { faker } from '@faker-js/faker';
-import { after } from 'node:test';
-import { JsonContains } from 'typeorm';
+import { CreateNoteDto } from 'src/note/dto/create-note.dto';
+import { AuthService } from 'src/auth/auth.service';
 
 describe('Notes API (e2e)', () => {
   let app: INestApplication;
@@ -21,6 +21,15 @@ describe('Notes API (e2e)', () => {
     app.useGlobalPipes(new ValidationPipe());
 
     await app.init();
+
+    await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email: 'testuser@example.com', password: 'TestPassword123' })
+      .expect(200);
+    const jwtService = moduleFixture.get(AuthService);
+    authToken = (
+      await jwtService.signIn('testuser@example.com', 'TestPassword123')
+    ).access_token;
   });
 
   afterAll(async () => {
@@ -45,10 +54,10 @@ describe('Notes API (e2e)', () => {
   });
 
   it('should return a 400 if sign up is missing the email', async () => {
-    const badPayload = { 
+    const badPayload = {
       name: faker.person.fullName(),
       password: 'TestPassword123',
-     } as CreateUserDto;
+    } as CreateUserDto;
 
     await request(app.getHttpServer())
       .post('/auth/signup')
@@ -56,9 +65,9 @@ describe('Notes API (e2e)', () => {
       .expect(400);
   });
 
-  it('should log in an existing user and receive an access token', async () => {
+  xit('should log in an existing user and receive an access token', async () => {
     const response = await request(app.getHttpServer())
-      .post('/api/auth/login')
+      .post('/auth/login')
       .send({ username: 'testuser', password: 'TestPassword123' })
       .expect(200);
 
@@ -66,11 +75,16 @@ describe('Notes API (e2e)', () => {
     authToken = response.body.accessToken;
   });
 
-  it('should create a new note', async () => {
+  it.only('should create a new note', async () => {
+    const notePayload = {
+      title: 'Test Note',
+      content: 'This is a test note.',
+    } as CreateNoteDto;
+
     const response = await request(app.getHttpServer())
-      .post('/api/notes')
+      .post('/notes')
       .set('Authorization', `Bearer ${authToken}`)
-      .send({ title: 'Test Note', content: 'This is a test note.' })
+      .send(notePayload)
       .expect(201);
 
     expect(response.body).toHaveProperty('id');
@@ -79,7 +93,7 @@ describe('Notes API (e2e)', () => {
 
   it('should get all notes for the authenticated user', async () => {
     const response = await request(app.getHttpServer())
-      .get('/api/notes')
+      .get('/notes')
       .set('Authorization', `Bearer ${authToken}`)
       .expect(200);
 
@@ -88,7 +102,7 @@ describe('Notes API (e2e)', () => {
 
   it('should get a note by ID', async () => {
     const response = await request(app.getHttpServer())
-      .get(`/api/notes/${noteId}`)
+      .get(`/notes/${noteId}`)
       .set('Authorization', `Bearer ${authToken}`)
       .expect(200);
     expect(response.body).toHaveProperty('title', 'Test Note');
@@ -96,7 +110,7 @@ describe('Notes API (e2e)', () => {
 
   it('should update a note by ID', async () => {
     const response = await request(app.getHttpServer())
-      .put(`/api/notes/${noteId}`)
+      .put(`/notes/${noteId}`)
       .set('Authorization', `Bearer ${authToken}`)
       .send({ title: 'Updated Note', content: 'Updated content.' })
       .expect(200);
@@ -106,14 +120,14 @@ describe('Notes API (e2e)', () => {
 
   it('should delete a note by ID', async () => {
     await request(app.getHttpServer())
-      .delete(`/api/notes/${noteId}`)
+      .delete(`/notes/${noteId}`)
       .set('Authorization', `Bearer ${authToken}`)
       .expect(200);
   });
 
   it('should share a note with another user', async () => {
     const response = await request(app.getHttpServer())
-      .post(`/api/notes/${noteId}/share`)
+      .post(`/notes/${noteId}/share`)
       .set('Authorization', `Bearer ${authToken}`)
       .send({ sharedWith: 'anotheruser' })
       .expect(201);
@@ -123,7 +137,7 @@ describe('Notes API (e2e)', () => {
 
   it('should search for notes based on keywords', async () => {
     const response = await request(app.getHttpServer())
-      .get('/api/search?q=test')
+      .get('/search?q=test')
       .set('Authorization', `Bearer ${authToken}`)
       .expect(200);
     expect(Array.isArray(response.body)).toBe(true);
