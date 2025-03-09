@@ -13,10 +13,10 @@ export class NoteService {
     private readonly noteRepository: MongoRepository<Note>,
   ) {}
 
-  create(newNote: CreateNoteDto, ownerId: string) {
-    const createdNote = this.noteRepository.create(newNote);
-    createdNote.ownerId = ownerId;
-    return createdNote;
+  async create(newNote: CreateNoteDto, ownerId: string): Promise<Note> {
+    const noteDto = new CreateNoteDto(newNote);
+    console.log('note', noteDto);
+    return this.noteRepository.save(noteDto.forUser(ownerId));
   }
 
   findAll(ownerId?: string) {

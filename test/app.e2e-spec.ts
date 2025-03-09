@@ -8,8 +8,44 @@ import { CreateNoteDto } from 'src/note/dto/create-note.dto';
 
 describe('Notes API (e2e)', () => {
   let app: INestApplication;
+  let validCredentials: any;
   let authToken: string;
   let noteId: string;
+
+  const createUser = async () => {
+    if (!validCredentials) {
+      const payload = {
+        name: faker.person.fullName(),
+        email: faker.internet.email(),
+        password: 'TestPassword123',
+      } as CreateUserDto;
+
+      await request(app.getHttpServer())
+        .post('/auth/signup')
+        .send(payload)
+        .expect(201)
+        .then((response) => {
+          expect(response.body).toHaveProperty('id');
+          expect(response.body).toHaveProperty('email', payload.email);
+        });
+
+      validCredentials = payload;
+    }
+
+    return validCredentials;
+  };
+
+  const loginUser = async () => {
+    const user = await createUser();
+    const response = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email: user.email, password: user.password })
+      .expect(200);
+
+    expect(response.body).toHaveProperty('access_token');
+    expect(typeof response.body.access_token).toBe('string');
+    authToken = response.body.access_token;
+  };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -28,20 +64,7 @@ describe('Notes API (e2e)', () => {
 
   describe.only('Auth', () => {
     it('should sign up a new user', async () => {
-      const payload = {
-        name: faker.person.fullName(),
-        email: faker.internet.email(),
-        password: 'TestPassword123',
-      } as CreateUserDto;
-
-      await request(app.getHttpServer())
-        .post('/auth/signup')
-        .send(payload)
-        .expect(201)
-        .then((response) => {
-          expect(response.body).toHaveProperty('id');
-          expect(response.body).toHaveProperty('email', payload.email);
-        });
+      await createUser();
     });
 
     it('should return a 400 if sign up is missing the email', async () => {
@@ -56,30 +79,17 @@ describe('Notes API (e2e)', () => {
         .expect(400);
     });
 
-    it('should log in an existing user and receive an access token', async () => {
-      const userPayload = {
-        name: faker.person.fullName(),
-        email: faker.internet.email(),
-        password: 'TestPassword123',
-      } as CreateUserDto;
-
-      await request(app.getHttpServer())
-        .post('/auth/signup')
-        .send(userPayload)
-        .expect(201);
-
-      const response = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({ email: userPayload.email, password: userPayload.password })
-        .expect(200);
-
-      expect(response.body).toHaveProperty('access_token');
-      expect(typeof response.body.access_token).toBe('string');
+    it('should login an existing user and receive an access token', async () => {
+      await loginUser();
     });
   });
 
   describe('Notes', () => {
-    it('should create a new note', async () => {
+    beforeAll(async () => {
+      await loginUser();
+    });
+
+    it.only('should create a new note', async () => {
       const notePayload = {
         title: 'Test Note',
         content: 'This is a test note.',

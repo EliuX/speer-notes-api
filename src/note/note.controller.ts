@@ -9,24 +9,27 @@ import {
   Req,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { NoteService } from 'src/note/note.service';
 import { CreateNoteDto } from 'src/note/dto/create-note.dto';
 import { UpdateNoteDto } from 'src/note/dto/update-note.dto';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { JwtGuard } from 'src/auth/guard/jwt.guard';
 
-// @UseGuards(JwtGuard)
+@UseGuards(JwtGuard)
 @Controller('notes')
 export class NoteController {
   constructor(private readonly noteService: NoteService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new note' })
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.CREATED)
   @ApiResponse({
     status: 201,
     description: 'The note has been successfully created',
   })
+  @ApiBody({ type: CreateNoteDto })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   create(@Req() req, @Body() createNoteDto: CreateNoteDto) {
     return this.noteService.create(createNoteDto, req.user.sub);
