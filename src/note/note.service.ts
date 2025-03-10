@@ -8,7 +8,10 @@ import { CreateNoteDto } from 'src/note/dto/create-note.dto';
 import { UpdateNoteDto } from 'src/note/dto/update-note.dto';
 import { Note } from './entities/note.entity';
 import { MongoRepository } from 'typeorm';
-import { convertStringToObjectId } from 'src/shared/entityUtils';
+import {
+  convertObjectIdToString,
+  convertStringToObjectId,
+} from 'src/shared/entityUtils';
 
 @Injectable()
 export class NoteService {
@@ -81,22 +84,24 @@ export class NoteService {
 
   async share(noteId: string, anotherUsersIds: string[], ownerId: string) {
     const note = await this.findOne(noteId, ownerId);
-    const targetListOfUserIds = anotherUsersIds.map(convertStringToObjectId);
+    const currentUserIds = (note.sharedWith || []).map(convertObjectIdToString);
 
-    note.sharedWith = note.sharedWith || [];
-
-    console.warn(targetListOfUserIds, note.sharedWith);
-    if (targetListOfUserIds.every((id) => note.sharedWith.includes(id))) {
+    if (
+      anotherUsersIds.every((userUUID) => currentUserIds.includes(userUUID))
+    ) {
       throw new ConflictException(
         `The note is already shared with the specified users`,
       );
     }
 
-    note.sharedWith.push(...targetListOfUserIds);
+    const uniqueUUIDsSharedWith = Array.from(
+      new Set([...currentUserIds, ...anotherUsersIds]),
+    ).map(convertStringToObjectId);
+
     return this.update(
       noteId,
       {
-        sharedWith: note.sharedWith,
+        sharedWith: uniqueUUIDsSharedWith,
       },
       ownerId,
     );

@@ -83,6 +83,10 @@ export class NoteController {
     status: 200,
     description: 'The note has been successfully shared.',
   })
+  @ApiResponse({
+    status: 409,
+    description: 'This note is already shared with the specified users',
+  })
   @ApiResponse({ status: 404, description: 'Note not found.' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   async share(
@@ -90,6 +94,6 @@ export class NoteController {
     @Param('id') noteId: string,
     @Body('sharedWith') anotherUserId: string[],
   ) {
-    return this.noteService.share(noteId, anotherUserId, req.user.sub);
+    return this.noteService.share(noteId, anotherUserId || [], req.user.sub);
   }
 }

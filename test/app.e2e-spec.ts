@@ -7,6 +7,7 @@ import { faker } from '@faker-js/faker';
 import { CreateNoteDto } from 'src/note/dto/create-note.dto';
 import { Note } from 'src/note/entities/note.entity';
 import { AuthUserDto } from 'src/auth/dto/auth-user.dto';
+import { convertObjectIdToString } from 'src/shared/entityUtils';
 
 describe('Notes API (e2e)', () => {
   let app: INestApplication;
@@ -155,21 +156,15 @@ describe('Notes API (e2e)', () => {
       expect(response.body).toHaveProperty('content', 'Updated content.');
     });
 
-    it('should delete a note by ID', async () => {
-      await request(app.getHttpServer())
-        .delete(`/notes/${newNote.id}`)
-        .set('Authorization', `Bearer ${authToken}`)
-        .expect(204);
-    });
-
     it('should share a note with another user', async () => {
+      const anotherUserId = validUser.id;
+      await createUser();
       const noteToShare = await createNote();
-      const anotherUserId = '67ce2450768e6dc3e6013b9e';
 
       const response = await request(app.getHttpServer())
         .post(`/notes/${noteToShare.id}/share`)
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ sharedWith: anotherUserId })
+        .send({ sharedWith: [anotherUserId] })
         .expect(201);
 
       expect(response.body).toHaveProperty('sharedWith', [anotherUserId]);
@@ -181,6 +176,15 @@ describe('Notes API (e2e)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
       expect(Array.isArray(response.body)).toBe(true);
+    });
+
+    it('should delete a note by ID', async () => {
+      const noteToDelete = await createNote();
+
+      await request(app.getHttpServer())
+        .delete(`/notes/${noteToDelete.id}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(204);
     });
   });
 });
