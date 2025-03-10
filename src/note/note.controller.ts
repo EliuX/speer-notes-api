@@ -46,7 +46,7 @@ export class NoteController {
   @ApiOperation({ summary: 'Get a note by id' })
   @ApiResponse({ status: 200, description: 'Return the note.' })
   @ApiResponse({ status: 404, description: 'Note not found.' })
-  findOne(@Req() req, @Param('id') id: string) {
+  async findOne(@Req() req, @Param('id') id: string) {
     return this.noteService.findOne(id, req.user.sub);
   }
 
@@ -57,7 +57,7 @@ export class NoteController {
     description: 'The note has been successfully updated.',
   })
   @ApiResponse({ status: 404, description: 'Note not found.' })
-  update(
+  async update(
     @Req() req,
     @Param('id') id: string,
     @Body() updateNoteDto: UpdateNoteDto,
@@ -67,12 +67,29 @@ export class NoteController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a note by id' })
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiResponse({
-    status: 200,
+    status: 204,
     description: 'The note has been successfully deleted.',
   })
   @ApiResponse({ status: 404, description: 'Note not found.' })
-  delete(@Req() req, @Param('id') id: string) {
-    return this.noteService.delete(id, req.user.sub);
+  async delete(@Req() req, @Param('id') id: string) {
+    await this.noteService.delete(id, req.user.sub);
+  }
+
+  @Post(':id/share')
+  @ApiOperation({ summary: 'Share a note with another user' })
+  @ApiResponse({
+    status: 200,
+    description: 'The note has been successfully shared.',
+  })
+  @ApiResponse({ status: 404, description: 'Note not found.' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  async share(
+    @Req() req,
+    @Param('id') noteId: string,
+    @Body('sharedWith') anotherUserId: string,
+  ) {
+    return this.noteService.share(noteId, anotherUserId, req.user.sub);
   }
 }

@@ -1,4 +1,9 @@
 import { PartialType } from '@nestjs/swagger';
 import { CreateNoteDto } from './create-note.dto';
 
-export class UpdateNoteDto extends PartialType(CreateNoteDto) {}
+export class UpdateNoteDto extends PartialType(CreateNoteDto) {
+  constructor(note: Partial<UpdateNoteDto>) {
+    super();
+    Object.assign(this, note);
+  }
+}

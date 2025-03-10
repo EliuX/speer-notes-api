@@ -42,4 +42,17 @@ export class Note extends BaseEntity {
     },
   )
   ownerId: string;
+
+  // @Transform(
+  //   ({ value }: { value: ObjectId[] }) => value.map(convertObjectIdToString),
+  //   {
+  //     toPlainOnly: true,
+  //   },
+  // )
+  // @ApiProperty({
+  //   description: 'List of user IDs with whom the note is shared',
+  //   example: ['67cde5e03e647eb8cd00ba36', '67cde5e03e647eb8cd00ba37'],
+  // })
+  // @IsString({ each: true })
+  sharedWith: ObjectId[];
 }

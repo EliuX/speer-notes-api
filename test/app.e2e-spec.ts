@@ -22,15 +22,14 @@ describe('Notes API (e2e)', () => {
         password: 'TestPassword123',
       } as CreateUserDto;
 
-      await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .post('/auth/signup')
         .send(validCredentials)
-        .expect(201)
-        .then((response) => {
-          expect(response.body).toHaveProperty('id');
-          expect(response.body).toHaveProperty('email', validCredentials.email);
-          validUser = new AuthUserDto(response.body);
-        });
+        .expect(201);
+
+      expect(response.body).toHaveProperty('id');
+      expect(response.body).toHaveProperty('email', validCredentials.email);
+      validUser = new AuthUserDto(response.body);
     }
 
     return validCredentials;
@@ -95,7 +94,7 @@ describe('Notes API (e2e)', () => {
       await loginUser();
     });
 
-    const createNewNote = async () => {
+    const createNote = async () => {
       if (!newNote) {
         const newNotePayload = {
           title: 'Test Note',
@@ -117,11 +116,11 @@ describe('Notes API (e2e)', () => {
     };
 
     it('should create a new note', async () => {
-      await createNewNote();
+      await createNote();
     });
 
     it('should get all notes for the authenticated user', async () => {
-      await createNewNote();
+      await createNote();
 
       const response = await request(app.getHttpServer())
         .get('/notes')
@@ -133,13 +132,15 @@ describe('Notes API (e2e)', () => {
     });
 
     it('should get a note by ID', async () => {
+      const lastNote = await createNote();
+
       const response = await request(app.getHttpServer())
-        .get(`/notes/${newNote.id}`)
+        .get(`/notes/${lastNote.id}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      expect(response.body).toHaveProperty('title', newNote.title);
-      expect(response.body).toHaveProperty('content', newNote.content);
+      expect(response.body).toHaveProperty('title', lastNote.title);
+      expect(response.body).toHaveProperty('content', lastNote.content);
     });
 
     it('should update a note by ID', async () => {
@@ -149,6 +150,7 @@ describe('Notes API (e2e)', () => {
         .send({ title: 'Updated Note', content: 'Updated content.' })
         .expect(200);
 
+      expect(response.body).toHaveProperty('id', newNote.id);
       expect(response.body).toHaveProperty('title', 'Updated Note');
       expect(response.body).toHaveProperty('content', 'Updated content.');
     });
@@ -157,17 +159,20 @@ describe('Notes API (e2e)', () => {
       await request(app.getHttpServer())
         .delete(`/notes/${newNote.id}`)
         .set('Authorization', `Bearer ${authToken}`)
-        .expect(200);
+        .expect(204);
     });
 
     it('should share a note with another user', async () => {
+      const noteToShare = await createNote();
+      const anotherUserId = '67ce2450768e6dc3e6013b9e';
+
       const response = await request(app.getHttpServer())
-        .post(`/notes/${newNote.id}/share`)
+        .post(`/notes/${noteToShare.id}/share`)
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ sharedWith: 'anotheruser' })
+        .send({ sharedWith: anotherUserId })
         .expect(201);
 
-      expect(response.body).toHaveProperty('sharedWith', 'anotheruser');
+      expect(response.body).toHaveProperty('sharedWith', [anotherUserId]);
     });
 
     it('should search for notes based on keywords', async () => {

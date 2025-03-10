@@ -3,7 +3,7 @@ import {
   CommonReadOnlyAttributes,
   convertStringToObjectId,
 } from 'src/shared/entityUtils';
-import { Note } from '../entities/note.entity';
+import { Note } from 'src/note/entities/note.entity';
 import { plainToClassFromExist } from 'class-transformer';
 
 export class CreateNoteDto extends OmitType(Note, [
