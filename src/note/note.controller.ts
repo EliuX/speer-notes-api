@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { NoteService } from 'src/note/note.service';
 import { CreateNoteDto } from 'src/note/dto/create-note.dto';
@@ -33,6 +34,14 @@ export class NoteController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   async create(@Req() req, @Body() createNoteDto: CreateNoteDto) {
     return this.noteService.create(createNoteDto, req.user.sub);
+  }
+
+  @Get('search')
+  @ApiOperation({ summary: 'Search notes by query' })
+  @ApiResponse({ status: 200, description: 'Return the search results.' })
+  @ApiResponse({ status: 404, description: 'No notes found.' })
+  async search(@Req() req, @Query('q') query: string) {
+    return this.noteService.search(query, req.user.sub);
   }
 
   @Get()
@@ -95,13 +104,5 @@ export class NoteController {
     @Body('sharedWith') anotherUserId: string[],
   ) {
     return this.noteService.share(noteId, anotherUserId || [], req.user.sub);
-  }
-
-  @Get('search/:query')
-  @ApiOperation({ summary: 'Search notes by query' })
-  @ApiResponse({ status: 200, description: 'Return the search results.' })
-  @ApiResponse({ status: 404, description: 'No notes found.' })
-  async search(@Req() req, @Param('query') query: string) {
-    return this.noteService.search(query, req.user.sub);
   }
 }

@@ -277,14 +277,19 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{speer_notes_api_host}}/notes/search/40",
+					"raw": "{{speer_notes_api_host}}/notes/search?q=edition",
 					"host": [
 						"{{speer_notes_api_host}}"
 					],
 					"path": [
 						"notes",
-						"search",
-						"40"
+						"search"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "edition"
+						}
 					]
 				}
 			},
