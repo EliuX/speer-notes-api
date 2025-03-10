@@ -10,6 +10,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
+  app.setGlobalPrefix(configService.getApiPrefix());
+
   app.useGlobalPipes(
     new ValidationPipe({
       disableErrorMessages: configService.isProduction(),

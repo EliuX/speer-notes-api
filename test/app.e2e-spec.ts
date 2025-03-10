@@ -7,7 +7,6 @@ import { faker } from '@faker-js/faker';
 import { CreateNoteDto } from 'src/note/dto/create-note.dto';
 import { Note } from 'src/note/entities/note.entity';
 import { AuthUserDto } from 'src/auth/dto/auth-user.dto';
-import { convertObjectIdToString } from 'src/shared/entityUtils';
 
 describe('Notes API (e2e)', () => {
   let app: INestApplication;

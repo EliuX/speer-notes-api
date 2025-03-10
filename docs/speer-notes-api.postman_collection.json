@@ -229,13 +229,13 @@
 					}
 				},
 				"url": {
-					"raw": "{{speer_notes_api_host}}/notes/{{lastCreatedNote}}2/share",
+					"raw": "{{speer_notes_api_host}}/notes/{{lastCreatedNote}}/share",
 					"host": [
 						"{{speer_notes_api_host}}"
 					],
 					"path": [
 						"notes",
-						"{{lastCreatedNote}}2",
+						"{{lastCreatedNote}}",
 						"share"
 					]
 				}

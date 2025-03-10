@@ -73,6 +73,7 @@ You can to test manually the project the following ways:
 - Execute the available [Postman collection in docs](./docs/speer-notes-api.postman_collection.json).
 
 ### Automated tests
+You can run the following tests:
 
   ```bash
   # unit tests
@@ -84,6 +85,8 @@ You can to test manually the project the following ways:
   # test coverage
   $ yarn run test:cov
   ```
+
+  This project emphasizes end-to-end (e2e) tests to ensure comprehensive functionality coverage. However, you will also find unit tests for key components, and you can analyze the overall test coverage.
 
 ## Stay in touch
 

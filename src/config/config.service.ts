@@ -27,4 +27,8 @@ export class ConfigService {
   public getJWTSecret(): string {
     return this.configService.getOrThrow('JWT_SECRET');
   }
+
+  public getApiPrefix() {
+    return this.configService.get('API_PREFIX') || '';
+  }
 }
