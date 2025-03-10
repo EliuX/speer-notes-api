@@ -18,27 +18,31 @@ Back End Assessment project for Senior Full Stack Developer (Speer)
 
 The project must be compliant with the [project overview](./docs/project-overview.md).
 
-### Library decisions
+### Design decisions
 
 - [TypeORM](https://typeorm.io/#/)
 
-I chose TypeORM for providing better compatibility with TypeScript than integration with MongoDB better than other choices, like Mongoose. It provides a robust and flexible ORM framework that integrates seamlessly with NestJS, allowing for easy database management and migrations. TypeORM's extensive documentation and support for multiple database systems make it a versatile choice for various project requirements.
+  TypeORM was chosen for its superior compatibility with TypeScript and its seamless integration with MongoDB, outperforming alternatives like Mongoose. It offers a robust and flexible ORM framework that integrates well with NestJS, facilitating easy database management and migrations. TypeORM's extensive documentation and support for multiple database systems make it a versatile choice for various project requirements.
 
-- Throttling management : In order to implement rate limiting and request throttling in a NestJS application, it was used the `nestjs/throttler` package, which provides an easy way to limit the number of requests per user/IP. It was configured to have a limit of 10 requests per minute.
+- Throttling management: To implement rate limiting and request throttling in the NestJS application, the `nestjs/throttler` package was used. This package provides an easy way to limit the number of requests per user/IP, configured to allow a maximum of 10 requests per minute.
+
+- Authentication: JWT was used for authentication with the help of [nestjs/passport](https://docs.nestjs.com/recipes/passport). This setup secures all endpoints using Guards. The Local guard validates user credentials during login, while the JWT Guard verifies access by extracting the JWT from the header and ensuring it was encrypted with the same secret. For notes, the token data is used to access the authenticated user's ID, enabling seamless resource filtering.
 
 ## Project setup
 
-```bash
-$ yarn install
-```
+- Firstly, install the dependencies
 
-## Compile and run the project
+  ```bash
+  $ yarn install
+  ```
 
-- Start services (MongoDB) with docker compose
+- Secondly, start services (MongoDB) with docker compose
 
   ```bash
   $ docker-compose up -d   
   ```
+
+## Compile and run the project
 
 - Start the project depending on the environment
 
@@ -64,12 +68,16 @@ command:
 
 ```bash
 $ curl -X POST http://localhost:3000/auth/login -d '{"username": "6763819045fff580d4e42ffc", "password": "stringst"}' -H "Content-Type: application/json"
-{"access_token":"jwt has here...."}
+{"access_token":"the jwt goes here...."}
 ```
 
 ## Run tests
 
+This project provides multiple ways of testing the API for notes.
+
+
 ### Manual tests
+
 You can to test manually the project the following ways:
 - Starting the app and checking the [swagger API](http://localhost:8080/swagger)
 - Execute the available [Postman collection in docs](./docs/speer-notes-api.postman_collection.json).
