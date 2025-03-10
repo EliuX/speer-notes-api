@@ -172,7 +172,7 @@ describe('Notes API (e2e)', () => {
 
     it('should search for notes based on keywords', async () => {
       const response = await request(app.getHttpServer())
-        .get('/search?q=test')
+        .get(`/search?q=test`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
       expect(Array.isArray(response.body)).toBe(true);

@@ -96,4 +96,12 @@ export class NoteController {
   ) {
     return this.noteService.share(noteId, anotherUserId || [], req.user.sub);
   }
+
+  @Get('search/:query')
+  @ApiOperation({ summary: 'Search notes by query' })
+  @ApiResponse({ status: 200, description: 'Return the search results.' })
+  @ApiResponse({ status: 404, description: 'No notes found.' })
+  async search(@Req() req, @Param('query') query: string) {
+    return this.noteService.search(query, req.user.sub);
+  }
 }

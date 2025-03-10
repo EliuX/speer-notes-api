@@ -106,4 +106,19 @@ export class NoteService {
       ownerId,
     );
   }
+
+  async search(searchText: string, ownerId: string): Promise<Note[]> {
+    return this.noteRepository.find({
+      where: {
+        ownerId: convertStringToObjectId(ownerId),
+        $or: [
+          { title: { $regex: searchText, $options: 'i' } },
+          { content: { $regex: searchText, $options: 'i' } },
+        ],
+      },
+      order: {
+        updatedAt: 'DESC',
+      },
+    });
+  }
 }

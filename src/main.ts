@@ -31,10 +31,24 @@ export function setupSwagger(app: INestApplication): void {
     .setTitle('Notes API (Speer)')
     .setDescription('API for Notes')
     .setVersion('0.0.1')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'Bearer',
+        bearerFormat: 'JWT',
+        in: 'header',
+      },
+      'access_token',
+    )
+    .addSecurityRequirements('access_token')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('swagger', app, document);
+  SwaggerModule.setup('swagger', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
 }
 
 export function setupGlobalFilters(app: INestApplication): void {
