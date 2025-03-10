@@ -62,13 +62,13 @@
 					}
 				},
 				"url": {
-					"raw": "{{speer_notes_api_host}}/auth/signin",
+					"raw": "{{speer_notes_api_host}}/auth/login",
 					"host": [
 						"{{speer_notes_api_host}}"
 					],
 					"path": [
 						"auth",
-						"signin"
+						"login"
 					]
 				}
 			},
@@ -105,6 +105,18 @@
 							"pm.globals.set(\"newNoteContent\", `Lorem ipsum dolor sit amet ${notesCounter}...`);",
 							"",
 							"pm.globals.set(\"notesCounter\", notesCounter + 1);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Set id of last successfully created note\", function () {",
+							"    var jsonData = pm.response.json();  ",
+							"    pm.environment.set(\"lastCreatedNote\", jsonData.id); ",
+							"});"
 						],
 						"type": "text/javascript"
 					}
@@ -254,6 +266,25 @@
 					],
 					"path": [
 						"notes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search note",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{speer_notes_api_host}}/notes/search/40",
+					"host": [
+						"{{speer_notes_api_host}}"
+					],
+					"path": [
+						"notes",
+						"search",
+						"40"
 					]
 				}
 			},
