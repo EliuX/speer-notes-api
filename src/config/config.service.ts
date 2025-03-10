@@ -35,4 +35,12 @@ export class ConfigService {
   public getFrontendOrigin(): string {
     return this.configService.getOrThrow('FRONTEND_ORIGIN');
   }
+
+  public getThrottleTTL(): number {
+    return Number.parseInt(this.configService.get('THROTTLE_TTL') || '60');
+  }
+
+  public getThrottleLimit(): number {
+    return Number.parseInt(this.configService.get('THROTTLE_LIMIT') || '10');
+  }
 }

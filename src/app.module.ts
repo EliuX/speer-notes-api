@@ -7,6 +7,7 @@ import { Note } from 'src/note/entities/note.entity';
 import { UserModule } from 'src/user/user.module';
 import { NoteModule } from 'src/note/note.module';
 import { AuthModule } from 'src/auth/auth.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -24,6 +25,16 @@ import { AuthModule } from 'src/auth/auth.module';
         url: configService.getMongoURI(),
       }),
       inject: [ConfigService],
+    }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => [
+        {
+          ttl: config.getThrottleLimit(),
+          limit: config.getThrottleLimit(),
+        },
+      ],
     }),
   ],
   controllers: [],

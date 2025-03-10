@@ -24,6 +24,8 @@ The project must be compliant with the [project overview](./docs/project-overvie
 
 I chose TypeORM for providing better compatibility with TypeScript than integration with MongoDB better than other choices, like Mongoose. It provides a robust and flexible ORM framework that integrates seamlessly with NestJS, allowing for easy database management and migrations. TypeORM's extensive documentation and support for multiple database systems make it a versatile choice for various project requirements.
 
+- Throttling management : In order to implement rate limiting and request throttling in a NestJS application, it was used the `nestjs/throttler` package, which provides an easy way to limit the number of requests per user/IP. It was configured to have a limit of 10 requests per minute.
+
 ## Project setup
 
 ```bash
