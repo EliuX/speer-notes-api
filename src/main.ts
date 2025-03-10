@@ -12,6 +12,8 @@ async function bootstrap() {
 
   app.setGlobalPrefix(configService.getApiPrefix());
 
+  app.enableCors({ origin: configService.getFrontendOrigin() });
+
   app.useGlobalPipes(
     new ValidationPipe({
       disableErrorMessages: configService.isProduction(),

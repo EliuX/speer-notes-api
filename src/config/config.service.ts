@@ -31,4 +31,8 @@ export class ConfigService {
   public getApiPrefix() {
     return this.configService.get('API_PREFIX') || '';
   }
+
+  public getFrontendOrigin(): string {
+    return this.configService.getOrThrow('FRONTEND_ORIGIN');
+  }
 }
