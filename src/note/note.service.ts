@@ -79,20 +79,20 @@ export class NoteService {
     }
   }
 
-  async share(noteId: string, anotherUserId: string, ownerId: string) {
-    console.warn(noteId, anotherUserId, ownerId);
-
+  async share(noteId: string, anotherUsersIds: string[], ownerId: string) {
     const note = await this.findOne(noteId, ownerId);
-    const targetUserId = convertStringToObjectId(anotherUserId);
+    const targetListOfUserIds = anotherUsersIds.map(convertStringToObjectId);
 
     note.sharedWith = note.sharedWith || [];
-    if (note.sharedWith.includes(targetUserId)) {
+
+    console.warn(targetListOfUserIds, note.sharedWith);
+    if (targetListOfUserIds.every((id) => note.sharedWith.includes(id))) {
       throw new ConflictException(
-        `The note is already shared the specified user`,
+        `The note is already shared with the specified users`,
       );
     }
 
-    note.sharedWith.push(targetUserId);
+    note.sharedWith.push(...targetListOfUserIds);
     return this.update(
       noteId,
       {

@@ -88,7 +88,7 @@ export class NoteController {
   async share(
     @Req() req,
     @Param('id') noteId: string,
-    @Body('sharedWith') anotherUserId: string,
+    @Body('sharedWith') anotherUserId: string[],
   ) {
     return this.noteService.share(noteId, anotherUserId, req.user.sub);
   }

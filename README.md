@@ -67,6 +67,13 @@ $ curl -X POST http://localhost:3000/auth/login -d '{"username": "6763819045fff5
 
 ## Run tests
 
+### Manual tests
+You can to test manually the project the following ways:
+- Starting the app and checking the [swagger API](http://localhost:8080/swagger)
+- Execute the available [Postman collection in docs](./docs/speer-notes-api.postman_collection.json).
+
+### Automated tests
+
   ```bash
   # unit tests
   $ yarn run test

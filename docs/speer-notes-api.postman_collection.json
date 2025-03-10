@@ -1,0 +1,311 @@
+{
+	"info": {
+		"_postman_id": "c4869c58-4e78-4f9d-8cef-15c4b8441b5d",
+		"name": "speer-notes-api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1292097"
+	},
+	"item": [
+		{
+			"name": "Signup",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Eliecer Hernandez\",\n    \"email\": \"eliecerhdz@gmail.com\",\n    \"password\": \"SpeerTestPassword123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{speer_notes_api_host}}/auth/signup",
+					"host": [
+						"{{speer_notes_api_host}}"
+					],
+					"path": [
+						"auth",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Set JWT in environment\", function () {",
+							"    var jsonData = pm.response.json();  ",
+							"    pm.environment.set(\"SPEER_JWT\", jsonData.access_token); ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"eliecerhdz@gmail.com\",\n    \"password\": \"SpeerTestPassword123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{speer_notes_api_host}}/auth/signin",
+					"host": [
+						"{{speer_notes_api_host}}"
+					],
+					"path": [
+						"auth",
+						"signin"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Profile",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{speer_notes_api_host}}/auth/profile",
+					"host": [
+						"{{speer_notes_api_host}}"
+					],
+					"path": [
+						"auth",
+						"profile"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add new note",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const notesCounter = pm.globals.get(\"notesCounter\") || 1;",
+							"",
+							"pm.globals.set(\"newNoteTitle\", `Note #${notesCounter}`);",
+							"pm.globals.set(\"newNoteContent\", `Lorem ipsum dolor sit amet ${notesCounter}...`);",
+							"",
+							"pm.globals.set(\"notesCounter\", notesCounter + 1);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"{{newNoteTitle}}\",\n    \"content\": \"{{newNoteContent}}\",\n    \"ownerId\": \"this id should be ignored in the server\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{speer_notes_api_host}}/notes",
+					"host": [
+						"{{speer_notes_api_host}}"
+					],
+					"path": [
+						"notes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get my last note",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{speer_notes_api_host}}/notes/{{lastCreatedNote}}",
+					"host": [
+						"{{speer_notes_api_host}}"
+					],
+					"path": [
+						"notes",
+						"{{lastCreatedNote}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update my last note",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"{{newNoteTitle}} [edition #{{notesCounter}}]\",\n    \"content\": \"{{newNoteContent}} [edition #{{notesCounter}}]\",\n    \"ownerId\": \"this id should be ignored in the server\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{speer_notes_api_host}}/notes/{{lastCreatedNote}}",
+					"host": [
+						"{{speer_notes_api_host}}"
+					],
+					"path": [
+						"notes",
+						"{{lastCreatedNote}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Share note with another user",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sharedWith\": [\"67cde5e03e647eb8cd00ba45\"]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{speer_notes_api_host}}/notes/{{lastCreatedNote}}2/share",
+					"host": [
+						"{{speer_notes_api_host}}"
+					],
+					"path": [
+						"notes",
+						"{{lastCreatedNote}}2",
+						"share"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all my notes",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{speer_notes_api_host}}/notes",
+					"host": [
+						"{{speer_notes_api_host}}"
+					],
+					"path": [
+						"notes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete my last note",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{speer_notes_api_host}}/notes/{{lastCreatedNote}}",
+					"host": [
+						"{{speer_notes_api_host}}"
+					],
+					"path": [
+						"notes",
+						"{{lastCreatedNote}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{SPEER_JWT}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

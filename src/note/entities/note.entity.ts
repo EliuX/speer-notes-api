@@ -1,5 +1,5 @@
 import { BaseEntity } from 'src/shared/base.entity';
-import { Column, Entity, Index, ObjectId, ObjectIdColumn } from 'typeorm';
+import { Column, Entity, Index, ObjectId } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { faker } from '@faker-js/faker';
 import { IsNotEmpty, IsString, Length } from 'class-validator';
@@ -33,26 +33,24 @@ export class Note extends BaseEntity {
     description: 'ID of the owner of the note',
     example: '67cde5e03e647eb8cd00ba36',
   })
-  @Column()
-  @ObjectIdColumn()
   @Transform(
     ({ value }: { value: ObjectId }) => convertObjectIdToString(value),
     {
       toPlainOnly: true,
     },
   )
-  ownerId: string;
+  ownerId: ObjectId;
 
-  // @Transform(
-  //   ({ value }: { value: ObjectId[] }) => value.map(convertObjectIdToString),
-  //   {
-  //     toPlainOnly: true,
-  //   },
-  // )
-  // @ApiProperty({
-  //   description: 'List of user IDs with whom the note is shared',
-  //   example: ['67cde5e03e647eb8cd00ba36', '67cde5e03e647eb8cd00ba37'],
-  // })
-  // @IsString({ each: true })
+  @Transform(
+    ({ value }: { value: ObjectId[] }) => value.map(convertObjectIdToString),
+    {
+      toPlainOnly: true,
+    },
+  )
+  @ApiProperty({
+    description: 'List of user IDs with whom the note is shared',
+    example: ['67cde5e03e647eb8cd00ba36', '67cde5e03e647eb8cd00ba37'],
+  })
+  @Column({ nullable: false })
   sharedWith: ObjectId[];
 }
